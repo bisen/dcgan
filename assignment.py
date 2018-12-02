@@ -79,13 +79,13 @@ class Model:
 
         self.logits_real = None
         self.logits_fake = None
-        self.fake_images = self.generator(self.g_input_z)
+        self.g_output = self.generator(self.g_input_z)
         with tf.variable_scope("") as scope:
             #scale images to be -1 to 1
             self.logits_real = self.discriminator(self.image_batch)
             # Re-use discriminator weights on new inputs
             scope.reuse_variables()
-            self.logits_fake = self.discriminator(self.fake_images)
+            self.logits_fake = self.discriminator(self.g_output)
 
         # Declare losses, optimizers(trainers) and fid for evaluation
         self.g_loss = self.g_loss_function()
@@ -255,7 +255,7 @@ def test():
 
     ### YOUR CODE GOES HERE
     z = tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32)
-    gen_img_batch = sess.run(model.fake_images, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
+    gen_img_batch = sess.run(model.g_output, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
 
     ### Below, we've already provided code to save these generated images to files on disk
 

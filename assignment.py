@@ -224,7 +224,7 @@ def train():
             while True:
 
                 #### YOUR CODE GOES HERE
-                z = tf.random_uniform(shape=[model.batch_size, model.z_dim], minval=-1, maxval=1, dtype=tf.float32)
+                z = tf.random_uniform(shape=[args.batch_size, args.z_dim], minval=-1, maxval=1, dtype=tf.float32)
                 _, D_loss_curr = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
                 _, G_loss_curr = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 

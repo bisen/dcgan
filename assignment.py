@@ -94,7 +94,7 @@ class Model:
         self.d_train = self.d_trainer()
         self.fid = self.fid_function()
 
-    def generator(z):
+    def generator(self, z):
         with tf.variable_scope("generator"):
             W = tf.Variable(tf.random_normal([self.z_dim, 16*1024]))
             init = tf.reshape(tf.matmul(z, W), [4,4,1024])
@@ -103,7 +103,7 @@ class Model:
             deconv3 = layers.conv2d_transpose(deconv2, 128, [5,5], [1,2,2,1])
             return layers.conv2d_transpose(deconv3, 3, [5,5], [1,2,2,1])
     
-    def discriminator(x):
+    def discriminator(self, x):
         with tf.variable_scope("discriminator"):
             conv1 = layers.conv2d(image_batch, 128, [5,5], [1,2,2,1])
             conv2 = layers.conv2d(conv1, 256, [5,5], [1,2,2,1])

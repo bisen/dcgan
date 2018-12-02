@@ -114,7 +114,7 @@ class Model:
     # Training loss for Generator
     def g_loss_function(self):
         g_loss = None ### YOUR CODE GOES HERE
-        g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator), logits=logits_fake))
+        g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.logits_fake), logits=self.logits_fake))
         return g_loss
 
     # Training loss for Discriminator

@@ -109,7 +109,7 @@ class Model:
             conv2 = layers.conv2d(conv1, 256, [5,5], [1,2,2,1])
             conv3 = layers.conv2d(conv2, 512, [5,5], [1,2,2,1])
             conv4 = layers.conv2d(conv3, 1024, [5,5], [1,2,2,1])
-            return layers.dense( tf.reshape(conv4), [4*4*1024]), 1)
+            return layers.dense( tf.reshape(conv4, [4*4*1024]), 1)
 
     # Training loss for Generator
     def g_loss_function(self):

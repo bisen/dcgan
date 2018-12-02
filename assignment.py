@@ -77,6 +77,16 @@ class Model:
         #  - Build the discriminator graph with 2 inputs, one for real image input, one for fake
         #  - You might want to create helper function(s) to help accomplish the task
 
+        self.logits_real = None
+        self.logits_fake = None
+        self.fake_images = generator(self.g_input_z)
+        with tf.variable_scope("") as scope:
+            #scale images to be -1 to 1
+            self.logits_real = discriminator(self.image_batch)
+            # Re-use discriminator weights on new inputs
+            scope.reuse_variables()
+            self.logits_fake = discriminator(self.fake_images)
+
         # Declare losses, optimizers(trainers) and fid for evaluation
         self.g_loss = self.g_loss_function()
         self.d_loss = self.d_loss_function()
@@ -84,24 +94,42 @@ class Model:
         self.d_train = self.d_trainer()
         self.fid = self.fid_function()
 
+    def generator(z):
+        with tf.variable_scope("generator"):
+            W = tf.Variable(tf.random_normal([self.z_dim, 16*1024]))
+            init = tf.reshape(tf.matmul(z, W), [4,4,1024])
+            deconv1 = layers.conv2d_transpose(init, 512, [5,5], [1,2,2,1])
+            deconv2 = layers.conv2d_transpose(deconv1, 256, [5,5], [1,2,2,1])
+            deconv3 = layers.conv2d_transpose(deconv2, 128, [5,5], [1,2,2,1])
+            return layers.conv2d_transpose(deconv3, 3, [5,5], [1,2,2,1])
+    
+    def discriminator(x):
+        with tf.variable_scope("discriminator"):
+            conv1 = layers.conv2d(image_batch, 128, [5,5], [1,2,2,1])
+            conv2 = layers.conv2d(conv1, 256, [5,5], [1,2,2,1])
+            conv3 = layers.conv2d(conv2, 512, [5,5], [1,2,2,1])
+            conv4 = layers.conv2d(conv3, 1024, [5,5], [1,2,2,1])
+            return layers.dense( tf.reshape(conv4), [4*4*1024]), 1)
+
     # Training loss for Generator
     def g_loss_function(self):
         g_loss = None ### YOUR CODE GOES HERE
+        g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator), logits=logits_fake))
         return g_loss
 
     # Training loss for Discriminator
     def d_loss_function(self):
-        d_loss = None ### YOUR CODE GOES HERE
+        d_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.logits_real), logits=self.logits_real)) + tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(self.logits_fake), logits=self.logits_fake))
         return d_loss
 
     # Optimizer/Trainer for Generator
     def g_trainer(self):
-        g_train = None ### YOUR CODE GOES HERE
+        g_train = tf.train.AdamOptimizer(args.learn_rate, args.beta1).minimize(self.g_loss)
         return g_train
 
     # Optimizer/Trainer for Discriminator
     def d_trainer(self):
-        d_train = None ### YOUR CODE GOES HERE
+        d_train = tf.train.AdamOptimizer(args.learn_rate, args.beta1).minimize(self.d_loss)
         return d_train
 
     # For evaluating the quality of generated images
@@ -163,6 +191,10 @@ image_batch = dataset_iterator.get_next()
 # - Set up a tf placeholder for generator input (g_input_z)
 # - Initialize DCGAN model (graph) by using the Model class above
 
+g_input_z = tf.placeholder(tf.float32, [args.batch_size, args.z_dim])
+
+model = Model(image_batch, g_input_z)
+
 # Start session
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
@@ -192,6 +224,9 @@ def train():
             while True:
 
                 #### YOUR CODE GOES HERE
+                z = tf.random_uniform(shape=[model.batch_size, model.z_dim], minval=-1, maxval=1, dtype=tf.float32)
+                _, D_loss_curr = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
+                _, G_loss_curr = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 
                 # Print losses
                 if iteration % args.log_every == 0:
@@ -219,7 +254,8 @@ def train():
 def test():
 
     ### YOUR CODE GOES HERE
-    gen_img_batch = None    # Replace 'None' with code to sample a batch of random images
+    z = tf.random_uniform(shape=[model.batch_size, model.z_dim], minval=-1, maxval=1, dtype=tf.float32)
+    gen_img_batch = sess.run(model.fake_images, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
 
     ### Below, we've already provided code to save these generated images to files on disk
 

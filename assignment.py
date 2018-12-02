@@ -98,17 +98,17 @@ class Model:
         with tf.variable_scope("generator"):
             W = tf.Variable(tf.random_normal([args.batch_size, args.z_dim, 16*1024]))
             init = tf.reshape(tf.matmul(z, W), [args.batch_size,4,4,1024])
-            deconv1 = layers.conv2d_transpose(init, 512, [5,5], [1,2,2,1])
-            deconv2 = layers.conv2d_transpose(deconv1, 256, [5,5], [1,2,2,1])
-            deconv3 = layers.conv2d_transpose(deconv2, 128, [5,5], [1,2,2,1])
-            return layers.conv2d_transpose(deconv3, 3, [5,5], [1,2,2,1])
+            deconv1 = layers.conv2d_transpose(init, 512, [5,5], (2,2))
+            deconv2 = layers.conv2d_transpose(deconv1, 256, [5,5], (2,2))
+            deconv3 = layers.conv2d_transpose(deconv2, 128, [5,5], (2,2))
+            return layers.conv2d_transpose(deconv3, 3, [5,5], (2,2))
     
     def discriminator(self, x):
         with tf.variable_scope("discriminator"):
-            conv1 = layers.conv2d(image_batch, 128, [5,5], [1,2,2,1])
-            conv2 = layers.conv2d(conv1, 256, [5,5], [1,2,2,1])
-            conv3 = layers.conv2d(conv2, 512, [5,5], [1,2,2,1])
-            conv4 = layers.conv2d(conv3, 1024, [5,5], [1,2,2,1])
+            conv1 = layers.conv2d(image_batch, 128, [5,5], (2,2))
+            conv2 = layers.conv2d(conv1, 256, [5,5], (2,2))
+            conv3 = layers.conv2d(conv2, 512, [5,5], (2,2))
+            conv4 = layers.conv2d(conv3, 1024, [5,5], (2,2))
             return layers.dense( tf.reshape(conv4, [self.batch_size, 4*4*1024]), 1)
 
     # Training loss for Generator
@@ -224,7 +224,7 @@ def train():
             while True:
 
                 #### YOUR CODE GOES HERE
-                z = tf.random_uniform(shape=[args.batch_size, args.z_dim, 1], minval=-1, maxval=1, dtype=tf.float32)
+                z = tf.random_uniform(shape=[args.batch_size, 1, args.z_dim], minval=-1, maxval=1, dtype=tf.float32)
                 _, D_loss_curr = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
                 _, G_loss_curr = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 
@@ -254,7 +254,7 @@ def train():
 def test():
 
     ### YOUR CODE GOES HERE
-    z = tf.random_uniform(shape=[args.batch_size, args.z_dim, 1], minval=-1, maxval=1, dtype=tf.float32)
+    z = tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32)
     gen_img_batch = sess.run(model.fake_images, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
 
     ### Below, we've already provided code to save these generated images to files on disk

@@ -98,10 +98,10 @@ class Model:
         with tf.variable_scope("generator"):
             W = tf.Variable(tf.random_normal([args.batch_size, args.z_dim, 16*512]))
             init = tf.reshape(tf.matmul(z, W), [args.batch_size,4,4,512])
-            deconv1 = layers.conv2d_transpose(init, 256, [5,5], (2,2))
-            deconv2 = layers.conv2d_transpose(deconv1, 128, [5,5], (2,2))
-            deconv3 = layers.conv2d_transpose(deconv2, 64, [5,5], (2,2))
-            return layers.conv2d_transpose(deconv3, 3, [5,5], (2,2))
+            deconv1 = layers.conv2d_transpose(init, 256, [5,5], (2,2), padding='same')
+            deconv2 = layers.conv2d_transpose(deconv1, 128, [5,5], (2,2), padding='same')
+            deconv3 = layers.conv2d_transpose(deconv2, 64, [5,5], (2,2), padding='same')
+            return layers.conv2d_transpose(deconv3, 3, [5,5], (2,2), padding='same')
     
     def discriminator(self, x):
         with tf.variable_scope("discriminator"):

@@ -191,7 +191,7 @@ image_batch = dataset_iterator.get_next()
 # - Set up a tf placeholder for generator input (g_input_z)
 # - Initialize DCGAN model (graph) by using the Model class above
 
-g_input_z = tf.placeholder(tf.float32, [args.batch_size, args.z_dim, 1])
+g_input_z = tf.placeholder(tf.float32, [args.batch_size, 1, args.z_dim])
 
 model = Model(image_batch, g_input_z)
 

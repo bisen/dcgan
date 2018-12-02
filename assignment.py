@@ -105,7 +105,7 @@ class Model:
     
     def discriminator(self, x):
         with tf.variable_scope("discriminator"):
-            print ( "loyloy: {x.shape}" )
+            print ( "loyloy: ", x.shape  )
             conv1 = layers.conv2d(image_batch, 128, [5,5], (2,2))
             conv2 = layers.conv2d(conv1, 256, [5,5], (2,2))
             conv3 = layers.conv2d(conv2, 512, [5,5], (2,2))

@@ -105,10 +105,10 @@ class Model:
     
     def discriminator(self, x):
         with tf.variable_scope("discriminator"):
-            conv1 = layers.conv2d(x, 64, [5,5], (2,2))
-            conv2 = layers.conv2d(conv1, 128, [5,5], (2,2))
-            conv3 = layers.conv2d(conv2, 256, [5,5], (2,2))
-            conv4 = layers.conv2d(conv3, 512, [5,5], (2,2))
+            conv1 = layers.conv2d(x, 64, [5,5], (2,2), padding='same')
+            conv2 = layers.conv2d(conv1, 128, [5,5], (2,2), padding='same')
+            conv3 = layers.conv2d(conv2, 256, [5,5], (2,2), padding='same')
+            conv4 = layers.conv2d(conv3, 512, [5,5], (2,2), padding='same')
             print("loyloy: ", conv4.shape) 
             return layers.dense( tf.reshape(conv4, [args.batch_size, 4*4*512]), 1)
 

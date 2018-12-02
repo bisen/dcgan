@@ -224,7 +224,7 @@ def train():
             while True:
 
                 #### YOUR CODE GOES HERE
-                z = tf.random_uniform(shape=[args.batch_size, 1, args.z_dim], minval=-1, maxval=1, dtype=tf.float32)
+                z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
                 _, D_loss_curr = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
                 _, G_loss_curr = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 
@@ -254,7 +254,7 @@ def train():
 def test():
 
     ### YOUR CODE GOES HERE
-    z = tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32)
+    z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
     gen_img_batch = sess.run(model.g_output, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
 
     ### Below, we've already provided code to save these generated images to files on disk

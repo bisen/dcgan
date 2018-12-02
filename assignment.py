@@ -96,7 +96,7 @@ class Model:
 
     def generator(self, z):
         with tf.variable_scope("generator"):
-            W = tf.Variable(tf.random_normal([self.z_dim, 16*1024]))
+            W = tf.Variable(tf.random_normal([args.z_dim, 16*1024]))
             init = tf.reshape(tf.matmul(z, W), [4,4,1024])
             deconv1 = layers.conv2d_transpose(init, 512, [5,5], [1,2,2,1])
             deconv2 = layers.conv2d_transpose(deconv1, 256, [5,5], [1,2,2,1])

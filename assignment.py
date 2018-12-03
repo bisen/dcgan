@@ -247,7 +247,8 @@ def train():
         # Also, print the inception distance
         sess.run(dataset_iterator.initializer)
         #### YOUR CODE GOES HERE
-        fid_ = sess.run(model.fid)  # Use sess.run to get the inception distance value defined above
+        z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
+        fid_ = sess.run(model.fid, feed_dict= {g_input_z: z})  # Use sess.run to get the inception distance value defined above
         print('**** INCEPTION DISTANCE: %g ****' % fid_)
 
 

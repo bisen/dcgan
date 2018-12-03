@@ -83,10 +83,9 @@ class Model:
         self.g_output = self.generator(self.g_input_z)
 
         with tf.variable_scope("discriminator") as scope:
-            #scale images to be -1 to 1
             self.logits_real = self.discriminator(self.image_batch)
-            # Re-use discriminator weights on new inputs
-            scope.reuse_variables()
+
+        with tf.variable_scope("discriminator", reuse=True) as scope:
             self.logits_fake = self.discriminator(self.g_output)
 
         # Declare losses, optimizers(trainers) and fid for evaluation

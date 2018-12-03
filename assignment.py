@@ -247,7 +247,7 @@ def train():
         # Also, print the inception distance
         sess.run(dataset_iterator.initializer)
         #### YOUR CODE GOES HERE
-        fid_ = None  # Use sess.run to get the inception distance value defined above
+        fid_ = sess.run(self.fid)  # Use sess.run to get the inception distance value defined above
         print('**** INCEPTION DISTANCE: %g ****' % fid_)
 
 

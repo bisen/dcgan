@@ -253,7 +253,7 @@ def train():
                 z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
                 _, loss_g = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 
-                if iteration % args.num_gen_update == 0:
+                if iteration % args.num_gen_updates == 0:
                     _, loss_d = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
 
                 # Print losses

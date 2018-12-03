@@ -222,7 +222,7 @@ def train():
         # Loop over our data until we run out
         iteration = 0
         try:
-            while False:
+            while True:
 
                 #### YOUR CODE GOES HERE
                 z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))

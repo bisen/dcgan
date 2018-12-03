@@ -98,18 +98,40 @@ class Model:
         with tf.variable_scope("generator"):
             W = tf.Variable(tf.random_normal([args.batch_size, args.z_dim, 16*512]))
             init = tf.reshape(tf.matmul(z, W), [args.batch_size,4,4,512])
-            deconv1 = layers.conv2d_transpose(init, 256, [5,5], (2,2), padding='same', activation=tf.nn.relu)
-            deconv2 = layers.conv2d_transpose(deconv1, 128, [5,5], (2,2), padding='same', activation=tf.nn.relu)
-            deconv3 = layers.conv2d_transpose(deconv2, 64, [5,5], (2,2), padding='same', activation=tf.nn.relu)
-            return layers.conv2d_transpose(deconv3, 3, [5,5], (2,2), padding='same', activation=tf.nn.tanh)
-    
+            deconv1 = layers.conv2d_transpose(init, 256, [5,5], (2,2), padding='same')
+            deconv1 = tf.layers.batch_normalization(deconv1)
+            deconv1 = tf.nn.relu(deconv1)
+
+            deconv2 = layers.conv2d_transpose(deconv1, 128, [5,5], (2,2), padding='same')
+            deconv2 = tf.layers.batch_normalization(deconv2)
+            deconv2 = tf.nn.relu(deconv2)
+
+            deconv3 = layers.conv2d_transpose(deconv2, 64, [5,5], (2,2), padding='same')
+            deconv3 = tf.layers.batch_normalization(deconv3)
+            deconv3 = tf.nn.relu(deconv3)
+
+            deconv4 = layers.conv2d_transpose(deconv3, 64, [5,5], (2,2), padding='same')
+            deconv4 = tf.layers.batch_normalization(deconv4)
+            return tf.nn.tanh(deconv4)
+
     def discriminator(self, x):
         with tf.variable_scope("discriminator"):
-            conv1 = layers.conv2d(x, 64, [5,5], (2,2), padding='same', activation=tf.nn.leaky_relu)
-            conv2 = layers.conv2d(conv1, 128, [5,5], (2,2), padding='same', activation=tf.nn.leaky_relu)
-            conv3 = layers.conv2d(conv2, 256, [5,5], (2,2), padding='same', activation=tf.nn.leaky_relu)
-            conv4 = layers.conv2d(conv3, 512, [5,5], (2,2), padding='same', activation=tf.nn.sigmoid)
-            print("loyloy: ", conv4.shape) 
+            conv1 = layers.conv2d(x, 64, [5,5], (2,2), padding='same')
+            conv1 = tf.layers.batch_normalization(conv1)
+            conv1 = tf.nn.leaky_relu(conv1)
+
+            conv2 = layers.conv2d(conv1, 128, [5,5], (2,2), padding='same')
+            conv2 = tf.layers.batch_normalization(conv2)
+            conv2 = tf.nn.leaky_relu(conv2)
+
+            conv3 = layers.conv2d(conv2, 256, [5,5], (2,2), padding='same')
+            conv3 = tf.layers.batch_normalization(conv3)
+            conv3 = tf.nn.leaky_relu(conv3)
+
+            conv4 = layers.conv2d(conv3, 512, [5,5], (2,2), padding='same')
+            conv4 = tf.layers.batch_normalization(conv4)
+            conv4 = tf.nn.sigmoid(conv4)
+
             return layers.dense( tf.reshape(conv4, [args.batch_size, 4*4*512]), 1)
 
     # Training loss for Generator
@@ -125,12 +147,14 @@ class Model:
 
     # Optimizer/Trainer for Generator
     def g_trainer(self):
-        g_train = tf.train.AdamOptimizer(args.learn_rate, args.beta1).minimize(self.g_loss)
+        g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'generator')
+        g_train = tf.train.AdamOptimizer(args.learn_rate, args.beta1).minimize(self.g_loss, var_list=g_vars)
         return g_train
 
     # Optimizer/Trainer for Discriminator
     def d_trainer(self):
-        d_train = tf.train.AdamOptimizer(args.learn_rate, args.beta1).minimize(self.d_loss)
+        d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'discriminator')
+        d_train = tf.train.AdamOptimizer(args.learn_rate, args.beta1).minimize(self.d_loss, var_list=d_vars)
         return d_train
 
     # For evaluating the quality of generated images

@@ -79,8 +79,10 @@ class Model:
 
         self.logits_real = None
         self.logits_fake = None
+
         self.g_output = self.generator(self.g_input_z)
-        with tf.variable_scope("") as scope:
+
+        with tf.variable_scope("discriminator") as scope:
             #scale images to be -1 to 1
             self.logits_real = self.discriminator(self.image_batch)
             # Re-use discriminator weights on new inputs
@@ -110,39 +112,39 @@ class Model:
             deconv3 = tf.layers.batch_normalization(deconv3)
             deconv3 = tf.nn.relu(deconv3)
 
-            deconv4 = layers.conv2d_transpose(deconv3, 64, [5,5], (2,2), padding='same')
+            deconv4 = layers.conv2d_transpose(deconv3, 3, [5,5], (2,2), padding='same')
             deconv4 = tf.layers.batch_normalization(deconv4)
             return tf.nn.tanh(deconv4)
 
     def discriminator(self, x):
-        with tf.variable_scope("discriminator"):
-            conv1 = layers.conv2d(x, 64, [5,5], (2,2), padding='same')
-            conv1 = tf.layers.batch_normalization(conv1)
-            conv1 = tf.nn.leaky_relu(conv1)
+        conv1 = layers.conv2d(x, 64, [5,5], (2,2), padding='same')
+        conv1 = tf.layers.batch_normalization(conv1)
+        conv1 = tf.nn.leaky_relu(conv1)
 
-            conv2 = layers.conv2d(conv1, 128, [5,5], (2,2), padding='same')
-            conv2 = tf.layers.batch_normalization(conv2)
-            conv2 = tf.nn.leaky_relu(conv2)
+        conv2 = layers.conv2d(conv1, 128, [5,5], (2,2), padding='same')
+        conv2 = tf.layers.batch_normalization(conv2)
+        conv2 = tf.nn.leaky_relu(conv2)
 
-            conv3 = layers.conv2d(conv2, 256, [5,5], (2,2), padding='same')
-            conv3 = tf.layers.batch_normalization(conv3)
-            conv3 = tf.nn.leaky_relu(conv3)
+        conv3 = layers.conv2d(conv2, 256, [5,5], (2,2), padding='same')
+        conv3 = tf.layers.batch_normalization(conv3)
+        conv3 = tf.nn.leaky_relu(conv3)
 
-            conv4 = layers.conv2d(conv3, 512, [5,5], (2,2), padding='same')
-            conv4 = tf.layers.batch_normalization(conv4)
-            conv4 = tf.nn.sigmoid(conv4)
+        conv4 = layers.conv2d(conv3, 512, [5,5], (2,2), padding='same')
+        conv4 = tf.layers.batch_normalization(conv4)
+        conv4 = tf.nn.leaky_relu(conv4)
 
-            return layers.dense( tf.reshape(conv4, [args.batch_size, 4*4*512]), 1)
+        return layers.dense( tf.reshape(conv4, [args.batch_size, 4*4*512]), 1, tf.sigmoid)
 
     # Training loss for Generator
     def g_loss_function(self):
-        g_loss = None ### YOUR CODE GOES HERE
-        g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.logits_fake), logits=self.logits_fake))
+        #g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.logits_fake), logits=self.logits_fake))
+        g_loss = tf.reduce_mean(-log(self.logits_fake))
         return g_loss
 
     # Training loss for Discriminator
     def d_loss_function(self):
-        d_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.logits_real), logits=self.logits_real)) + tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(self.logits_fake), logits=self.logits_fake))
+        #d_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.logits_real), logits=self.logits_real)) + tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(self.logits_fake), logits=self.logits_fake))
+        d_loss = 0.5*tf.reduce_mean(-log(1-self.logits_fake) - log(self.logits_real))
         return d_loss
 
     # Optimizer/Trainer for Generator

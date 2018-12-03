@@ -99,6 +99,9 @@ class Model:
         with tf.variable_scope("generator"):
             W = tf.Variable(tf.random_normal([args.batch_size, args.z_dim, 16*512]))
             init = tf.reshape(tf.matmul(z, W), [args.batch_size,4,4,512])
+            init = tf.layers.batch_normalization(init)
+            init = tf.nn.relu(init)
+
             deconv1 = layers.conv2d_transpose(init, 256, [5,5], (2,2), padding='same')
             deconv1 = tf.layers.batch_normalization(deconv1)
             deconv1 = tf.nn.relu(deconv1)
@@ -112,12 +115,12 @@ class Model:
             deconv3 = tf.nn.relu(deconv3)
 
             deconv4 = layers.conv2d_transpose(deconv3, 3, [5,5], (2,2), padding='same')
-            deconv4 = tf.layers.batch_normalization(deconv4)
+            #deconv4 = tf.layers.batch_normalization(deconv4)
             return tf.nn.tanh(deconv4)
 
     def discriminator(self, x):
         conv1 = layers.conv2d(x, 64, [5,5], (2,2), padding='same')
-        conv1 = tf.layers.batch_normalization(conv1)
+        #conv1 = tf.layers.batch_normalization(conv1)
         conv1 = tf.nn.leaky_relu(conv1)
 
         conv2 = layers.conv2d(conv1, 128, [5,5], (2,2), padding='same')

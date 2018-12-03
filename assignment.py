@@ -251,13 +251,16 @@ def train():
 
                 #### YOUR CODE GOES HERE
                 z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
-                _, loss_d = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
                 _, loss_g = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 
-                # Print losses
                 if iteration % args.log_every == 0:
                     print('Iteration %d: Gen loss = %g | Discrim loss = %g' % \
 			(iteration, loss_g, loss_d))
+
+                # Print losses
+                if iteration % args.num_gen_update == 0:
+                    _, loss_d = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
+
                 # Save
                 if iteration % args.save_every == 0:
                     saver.save(sess, './dcgan_saved_model')

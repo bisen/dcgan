@@ -97,8 +97,8 @@ class Model:
 
     def generator(self, z):
         with tf.variable_scope("generator"):
-            W = tf.Variable(tf.random_normal([args.batch_size, args.z_dim, 16*512]))
-            init = tf.reshape(tf.matmul(z, W), [args.batch_size,4,4,512])
+            init = layers.dense(z, [args.batch_size, 4*4*512])
+            init = tf.reshape(init, [args.batch_size, 4, 4, 512])
             init = tf.layers.batch_normalization(init)
             init = tf.nn.relu(init)
 
@@ -220,7 +220,7 @@ image_batch = dataset_iterator.get_next()
 # - Set up a tf placeholder for generator input (g_input_z)
 # - Initialize DCGAN model (graph) by using the Model class above
 
-g_input_z = tf.placeholder(tf.float32, [args.batch_size, 1, args.z_dim])
+g_input_z = tf.placeholder(tf.float32, [args.batch_size, args.z_dim])
 
 model = Model(image_batch, g_input_z)
 
@@ -253,7 +253,7 @@ def train():
             while True:
 
                 #### YOUR CODE GOES HERE
-                z = np.random.uniform(-1.,1.,(args.batch_size, 1, args.z_dim,))
+                z = np.random.uniform(-1.,1.,(args.batch_size, args.z_dim,))
                 _, loss_d = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
 
                 for i in range(args.num_gen_updates):
@@ -278,7 +278,7 @@ def train():
         # Also, print the inception distance
         sess.run(dataset_iterator.initializer)
         #### YOUR CODE GOES HERE
-        z = np.random.uniform(-1.,1.,(args.batch_size, 1, args.z_dim,))
+        z = np.random.uniform(-1.,1.,(args.batch_size, args.z_dim,))
         fid_ = sess.run(model.fid, feed_dict= {g_input_z: z})  # Use sess.run to get the inception distance value defined above
         print('**** INCEPTION DISTANCE: %g ****' % fid_)
 
@@ -287,7 +287,7 @@ def train():
 def test():
 
     ### YOUR CODE GOES HERE
-    z = np.random.uniform(-1.,1.,(args.batch_size, 1, args.z_dim,))
+    z = np.random.uniform(-1.,1.,(args.batch_size, args.z_dim,))
     gen_img_batch = sess.run(model.g_output, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
 
     ### Below, we've already provided code to save these generated images to files on disk

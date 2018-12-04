@@ -253,11 +253,11 @@ def train():
             while True:
 
                 #### YOUR CODE GOES HERE
-                z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
-                _, loss_g = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
+                z = np.random.uniform(-1.,1.,(args.batch_size, 1, args.z_dim,))
+                _, loss_d = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
 
-                if iteration % args.num_gen_updates == 0:
-                    _, loss_d = sess.run([model.d_train, model.d_loss], feed_dict= {g_input_z: z})
+                for i in range(args.num_gen_updates):
+                    _, loss_g = sess.run([model.g_train, model.g_loss], feed_dict= {g_input_z: z})
 
                 # Print losses
                 if iteration % args.log_every == 0:
@@ -278,7 +278,7 @@ def train():
         # Also, print the inception distance
         sess.run(dataset_iterator.initializer)
         #### YOUR CODE GOES HERE
-        z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
+        z = np.random.uniform(-1.,1.,(args.batch_size, 1, args.z_dim,))
         fid_ = sess.run(model.fid, feed_dict= {g_input_z: z})  # Use sess.run to get the inception distance value defined above
         print('**** INCEPTION DISTANCE: %g ****' % fid_)
 
@@ -287,7 +287,7 @@ def train():
 def test():
 
     ### YOUR CODE GOES HERE
-    z = sess.run(tf.random_uniform(shape=[args.batch_size, 1, args.z_dim,], minval=-1, maxval=1, dtype=tf.float32))
+    z = np.random.uniform(-1.,1.,(args.batch_size, 1, args.z_dim,))
     gen_img_batch = sess.run(model.g_output, feed_dict={g_input_z: z})     # Replace 'None' with code to sample a batch of random images
 
     ### Below, we've already provided code to save these generated images to files on disk

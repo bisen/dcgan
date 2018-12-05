@@ -97,7 +97,7 @@ class Model:
 
     def generator(self, z):
         with tf.variable_scope("generator"):
-            init = layers.dense(z, [args.batch_size, 4*4*512])
+            init = layers.dense(z, 4*4*512)
             init = tf.reshape(init, [args.batch_size, 4, 4, 512])
             init = tf.layers.batch_normalization(init)
             init = tf.nn.relu(init)
